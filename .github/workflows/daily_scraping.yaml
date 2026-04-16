@@ -1,0 +1,32 @@
+name: Property ETL Automation
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Berjalan otomatis setiap jam 7 Pagi WIB
+  workflow_dispatch:      # Memungkinkan jalankan manual dari tab "Actions"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run ETL Script
+        run: python scraper.py
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add data/property_data.csv
+          git commit -m "Auto-update data properti $(date)" || exit 0
+          git push
